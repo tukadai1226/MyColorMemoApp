@@ -55,8 +55,45 @@
             </objects>
             <point key="canvasLocation" x="139.69465648854961" y="3.5211267605633805"/>
         </scene>
+        <!--Memo Detail View Controller-->
+        <scene sceneID="UYT-N6-mfF">
+            <objects>
+                <viewController storyboardIdentifier="MemoDetailViewController" id="SEj-OS-btz" customClass="MemoDetailViewController" customModule="MyColorMemoApp" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="ITE-TS-byi" customClass="Memo">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="ZpA-Ei-WRA">
+                                <rect key="frame" x="10" y="69" width="373" height="759"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <mutableString key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</mutableString>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="ZwY-Yt-OyU"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="ZpA-Ei-WRA" firstAttribute="leading" secondItem="ZwY-Yt-OyU" secondAttribute="leading" constant="10" id="5qD-ao-L1b"/>
+                            <constraint firstItem="ZpA-Ei-WRA" firstAttribute="top" secondItem="ZwY-Yt-OyU" secondAttribute="top" constant="10" id="M1M-kf-h8c"/>
+                            <constraint firstItem="ZpA-Ei-WRA" firstAttribute="bottom" secondItem="ZwY-Yt-OyU" secondAttribute="bottom" constant="10" id="QHt-nQ-YOr"/>
+                            <constraint firstItem="ZwY-Yt-OyU" firstAttribute="trailing" secondItem="ZpA-Ei-WRA" secondAttribute="trailing" constant="10" id="r34-Pi-Pvs"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="textView" destination="ZpA-Ei-WRA" id="tJ7-zh-AXg"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1nb-km-QbL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="139.69465648854961" y="719.71830985915494"/>
+        </scene>
     </scenes>
     <resources>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
