@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit // UIに関するクラスが格納されたモジュール
+import RealmSwift
 // UIViewController:UIKitのクラス
 class HomeViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
@@ -14,6 +15,7 @@ class HomeViewController: UIViewController {
     var memoDataList: [MemoDataModel] = []
     
     override func viewDidLoad() {
+        super.viewDidLoad()
         // このの画面が表示される際に呼び出されるメソッド
         // 画面の表示・非表示に応じて実行されるメソッドをライフサイクルと呼ぶ
         
@@ -23,18 +25,25 @@ class HomeViewController: UIViewController {
         tableView.delegate = self
         tableView.tableFooterView = UIView()
         
-        setMemoData()
         // ホーム画面のヘッダーに+(メモ追加ボタン)を配置し、ボタンタップで詳細画面に遷移するメソッド
         setNavigationBarButton()
     }
     
+    // 画面が表示されるたびに毎回データを取得するようにviewWillApperにsetMemoDataメソッドを追記
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        setMemoData()
+        // UITableViewの表示更新をするtableView.reloadDataを追記
+        tableView.reloadData()
+    }
+    // Realmからメモデータを取得する
     func setMemoData() {
-        for i in 1...5 {
-            let memoDataModel = MemoDataModel()
-            memoDataModel.text = "このメモは\(i)番目のメモです。"
-            memoDataModel.recordDate = Date()
-            memoDataList.append(memoDataModel)
-        }
+        // Realmをインスタンス化
+        let realm = try! Realm()
+        // インスタンス化したRealmから全件取得
+        let result = realm.objects(MemoDataModel.self)//realm.objects()メソッドは、取得したいデータの型を引数として要求します。MemoDataModel.selfを渡すことで、「MemoDataModel型のデータを取得する」という指示をRealmに与えています。
+        // 取得結果を配列としてメモデータリストに代入する
+        memoDataList = Array(result)
     }
     
     // 新しいメモを追加する
@@ -55,20 +64,21 @@ class HomeViewController: UIViewController {
         navigationItem.rightBarButtonItem = rightBarButton
     }
 }
-
+ // UITableViewDataSourceはテーブルビューにデータを提供するプロトコル
 extension HomeViewController: UITableViewDataSource {
-    // リストの数を指定する
+    // テーブルビューに表示する行数（セルの数）を指定する
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // memoDataListの要素の数を取り出して指定する
+        // 配列に格納されているデータの数だけ、セルが表示される(memoDataListの要素の数を取り出して指定する)
         return memoDataList.count
     }
-    // リストの中身を定義
+    // cellForRowAt: 各行（セル）に表示するデータを設定
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
+        let cell = UITableViewCell(style: .subtitle,                // style: .subtitle:セルのスタイルを指定（メインのテキストと詳細テキストを表示）
+                                   reuseIdentifier: "cell")         // reuseIdentifier: "cell":セルを再利用するための識別子を指定
         // indexPath.row→UItableViewに表示されるCellの(0から始まる)通り番号が順番に渡される
         let memoDataModel: MemoDataModel = memoDataList[indexPath.row]
-        cell.textLabel?.text = memoDataModel.text
-        cell.detailTextLabel?.text = "\(memoDataModel.recordDate)"
+        cell.textLabel?.text = memoDataModel.text                   // textLabel:メインのテキスト（メモの内容）を表示
+        cell.detailTextLabel?.text = "\(memoDataModel.recordDate)"  // detailTextLabel:サブテキスト（メモの作成日時）を表示
         return cell
     }
 }
@@ -88,5 +98,19 @@ extension HomeViewController: UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
         // ナビゲーションコントローラーのpushViewControllerメソッドを使用し画面遷移を定義する。
         navigationController?.pushViewController(memoDetailViewController, animated: true)
+    }
+    // UITableViewのセルが横スワイプされた際に実行されるメソッド
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        // データの削除処理を実行
+        let targetMemo = memoDataList[indexPath.row]
+        let realm = try! Realm()
+        try! realm.write {
+            realm.delete(targetMemo)
+        }
+        // 上記の削除だけではRealmの削除は完了してもこのクラスのプロパティにデータが残ったままなので表示されたままになってしまうので削除する
+        // memoDataListの配列から削除
+        memoDataList.remove(at: indexPath.row)
+        // deleteRows(at:with:):テーブルビューから、削除対象のセルを取り除く
+        tableView.deleteRows(at: [indexPath], with: .automatic)  // with: .automatic:セルの削除時に、適切なアニメーション（スライドアウトなど）を適用
     }
 }

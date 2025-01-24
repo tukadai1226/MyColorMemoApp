@@ -6,11 +6,12 @@
 //
 
 import UIKit
+import RealmSwift
 
 class MemoDetailViewController: UIViewController {
     @IBOutlet weak var textView: UITextView!
-    var text: String = ""
-    var recordDate: Date = Date()
+    
+    var memoData = MemoDataModel()
     
     // 日付のフォーマットを変換
     //コンピュティッドプロパティで値を値を保持するのではなく、プロパティが呼び出されたときに内部で計算を行い、その結果を返す
@@ -25,23 +26,27 @@ class MemoDetailViewController: UIViewController {
     }
     
     override func viewDidLoad() {
+        super.viewDidLoad()
         self.displayData()
         setDoneButton()
+        
+        // UITextViewのデリゲートを設定
+        textView.delegate = self
     }
     
     // MemoDetailViewControllerにメモデータを渡すメソッド
     func configure(memo: MemoDataModel) {
-        text = memo.text
-        recordDate = memo.recordDate
-        print("データは\(text)と\(recordDate)です")
+        memoData.text = memo.text
+        memoData.recordDate = memo.recordDate
+        print("データは\(memoData.text)と\(memoData.recordDate)です")
     }
     
     // メモ詳細を表示するメソッド
     func displayData() {
-        textView.text = text
+        textView.text = memoData.text
         // UIViewControllerクラスが持つ機能にnavigationItemがある
         // コンピュティッドプロパティでrecordDateというDate型の値を、指定されたフォーマット（ここでは"yyyy年MM月dd日"）に基づいて文字列に変換する
-        navigationItem.title = dateFormat.string(from: recordDate)
+        navigationItem.title = dateFormat.string(from: memoData.recordDate)
     }
     
     // キーボードを消す処理
@@ -75,4 +80,23 @@ class MemoDetailViewController: UIViewController {
     }
     
     // メモを保存するメソッド
+    func saveData(with text: String) {
+        // Realmを呼び出す
+        let realm = try! Realm()
+        // 書き込み開始
+        try! realm.write {
+            memoData.text = text
+            memoData.recordDate = Date()
+            realm.add(memoData)
+        }
+        print("text: \(memoData.text), recordDate: \(memoData.recordDate)")
+    }
+}
+// UITextViewDelegateはUIViewのテキストが変更される度に保存する
+extension MemoDetailViewController: UITextViewDelegate {
+    func textViewDidChange(_ textView: UITextView) {
+        let updatedText = textView.text ?? ""
+        saveData(with: updatedText)
+    }
+    
 }
