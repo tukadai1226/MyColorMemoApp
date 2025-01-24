@@ -73,4 +73,6 @@ class MemoDetailViewController: UIViewController {
         //作成したツールバーをUITextViewクラスのinputAccessoryViewに代入することでキーボード上に表示できる
         textView.inputAccessoryView = toolBar
     }
+    
+    // メモを保存するメソッド
 }

@@ -30,7 +30,9 @@ class HomeViewController: UIViewController {
     
     func setMemoData() {
         for i in 1...5 {
-            let memoDataModel = MemoDataModel(text: "このメモは\(i)番目のメモです。", recordDate: Date())
+            let memoDataModel = MemoDataModel()
+            memoDataModel.text = "このメモは\(i)番目のメモです。"
+            memoDataModel.recordDate = Date()
             memoDataList.append(memoDataModel)
         }
     }
