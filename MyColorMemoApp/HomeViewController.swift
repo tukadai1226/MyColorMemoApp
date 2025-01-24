@@ -13,6 +13,8 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     // MemoDataModelの宣言
     var memoDataList: [MemoDataModel] = []
+    // ユーザデフォルトのデータにアクセルするための文字列のキー(アプリ内で一意である必要がある)
+    let themeColorTypeKey = "themeColorTypeKey"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,6 +29,16 @@ class HomeViewController: UIViewController {
         
         // ホーム画面のヘッダーに+(メモ追加ボタン)を配置し、ボタンタップで詳細画面に遷移するメソッド
         setNavigationBarButton()
+        // ナビゲーションにイメージ画像ボタンを追加
+        setLeftNavigationBarButton()
+        // ユーザーデフォルトに保存されているテーマカラーを反映
+        // .integer(forKey:): 指定したキー(themeColorTypeKey)に関連付けられて保存されている整数値を取得
+        let themeColorTypeInt = UserDefaults.standard.integer(forKey: themeColorTypeKey)
+        // MyColerType は列挙型であり、rawValue を使って列挙型の値を初期化
+        // 例えば、themeColorTypeInt が 1 の場合、MyColerType.orange が返される
+        let themeColorType = MyColerType(rawValue: themeColorTypeInt) ?? .default
+        // 初期のイメージ画像の色を黒にする
+        setThemeColor(type: themeColorType)
     }
     
     // 画面が表示されるたびに毎回データを取得するようにviewWillApperにsetMemoDataメソッドを追記
@@ -63,6 +75,95 @@ class HomeViewController: UIViewController {
         let rightBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: buttonActionSelector)
         navigationItem.rightBarButtonItem = rightBarButton
     }
+    // ナビゲーションバーに画像を追加
+    func setLeftNavigationBarButton() {
+        let buttonActionSelector: Selector = #selector(didTapColerSettingButton)
+        // ボタンを追加
+        // ボタンをインスタンス化しイメージ画像引数で渡し初期化する
+        let leftButtonImage = UIImage(named: "colorSttingIcon.png")
+        let leftButton = UIBarButtonItem(image: leftButtonImage, style: .plain, target: self, action: buttonActionSelector)
+        navigationItem.leftBarButtonItem = leftButton
+    }
+    // イメージ画像ボタンタップ後の処理
+    @objc func didTapColerSettingButton() {
+        let defaultAction = UIAlertAction(title: "デフォルト", style: .default, handler: { _ -> Void in
+            self.setThemeColor(type: .default)
+        })
+        let orangeAction = UIAlertAction(title: "オレンジ", style: .default, handler: {_ -> Void in
+            self.setThemeColor(type: .orange)
+            
+        })
+        let redAction = UIAlertAction(title: "レッド", style: .default, handler: {_ -> Void in
+            self.setThemeColor(type: .red)
+        })
+        let blueAction = UIAlertAction(title: "ブルー", style: .default, handler: {_ -> Void in
+            self.setThemeColor(type: .blue)
+        })
+        let greenAction = UIAlertAction(title: "グリーン", style: .default, handler: {_ -> Void in
+            self.setThemeColor(type: .green)
+        })
+        let pinkAction = UIAlertAction(title: "ピンク", style: .default, handler: {_ -> Void in
+            self.setThemeColor(type: .pink)
+        })
+        let purpleAction = UIAlertAction(title: "パープル", style: .default, handler: {_ -> Void in
+            self.setThemeColor(type: .purple)
+        })
+        let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel, handler: nil)
+        // アラートコントローラーの上に表示される文字
+        let alert = UIAlertController(title: "テーマカラーを選択して下さい", message: "", preferredStyle: .actionSheet)
+        
+        alert.addAction(defaultAction)
+        alert.addAction(orangeAction)
+        alert.addAction(redAction)
+        alert.addAction(blueAction)
+        alert.addAction(greenAction)
+        alert.addAction(pinkAction)
+        alert.addAction(purpleAction)
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true)
+    }
+    
+    // UIナビゲーションバーの配色を変更するメソッド
+    func setThemeColor(type: MyColerType) {
+        // navigationControllerクラスのnavigationBar.barTintColorに色を代入する
+        // navigationControllerがnilでないか確認
+        guard let navigationBar = navigationController?.navigationBar else {
+            print("NavigationControllerが存在しません")
+            return
+        }
+        
+        if #available(iOS 15, *) {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithTransparentBackground()
+            appearance.backgroundColor = type.color
+            // 指定されたナビゲーションの色がデフォルトかどうかを判別する
+            let isDefault = type == .default
+            // 指定された色がデフォルトだった場合は黒、デフォルト以外は白を代入する
+            let tintColor: UIColor = isDefault ? .black : .white
+            // ボタンの色を代入する
+            navigationController?.navigationBar.tintColor = tintColor
+            // ナビゲーションバーのタイトルの色もイメージカラーと同じ色にする
+            appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: tintColor] // Dictionary型[Key: Value]
+            navigationBar.standardAppearance = appearance
+            navigationBar.scrollEdgeAppearance = appearance
+            print("color:\(type)")
+        } else {
+            // iOS 14以前の場合
+            navigationBar.barTintColor = type.color
+            print("color:\(type)")
+            // 指定されたナビゲーションの色がデフォルトかどうかを判別する
+            let isDefault = type == .default
+            // 指定された色がデフォルトだった場合は黒、デフォルト以外は白を代入する
+            let tintColor: UIColor = isDefault ? .black : .white
+            // ボタンの色を代入する
+            navigationController?.navigationBar.tintColor = tintColor
+            // ナビゲーションバーのタイトルの色もイメージカラーと同じ色にする
+            navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: tintColor] // Dictionary型[Key: Value]
+        }
+        // ユーザーデフォルトにイメージカラーを保存
+        saveThemeColor(type:type)
+    }
 }
  // UITableViewDataSourceはテーブルビューにデータを提供するプロトコル
 extension HomeViewController: UITableViewDataSource {
@@ -80,6 +181,10 @@ extension HomeViewController: UITableViewDataSource {
         cell.textLabel?.text = memoDataModel.text                   // textLabel:メインのテキスト（メモの内容）を表示
         cell.detailTextLabel?.text = "\(memoDataModel.recordDate)"  // detailTextLabel:サブテキスト（メモの作成日時）を表示
         return cell
+    }
+    // ユーザーデフォルトにデータを保存する(standardメソッドを使用する)
+    func saveThemeColor(type: MyColerType) {
+        UserDefaults.standard.set(type.rawValue, forKey: themeColorTypeKey) // type:保存する値 forkey:データにアクセルするための文字列のキー
     }
 }
 
